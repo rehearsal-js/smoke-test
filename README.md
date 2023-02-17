@@ -1,5 +1,5 @@
 # smoke-test
-
+[![Build Status](https://github.com/rehearsal-js/smoke-test/workflows/CLI-Smoke-Test/badge.svg)](https://github.com/rehearsal-js/smoke-test/actions/workflows/run-smoke-test.yml)
 
 The purpose of this package is to provide a simple smoke test for @rehearsal/cli commands. It is not intended to be used in production, nor should it be published to npm.
 
