@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # save the project root path
 PROJECT_ROOT=$(pwd)
 
