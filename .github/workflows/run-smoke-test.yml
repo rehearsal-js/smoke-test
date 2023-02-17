@@ -1,0 +1,19 @@
+name: CLI Smoke Test
+
+on: push
+on: pull_request
+
+jobs:
+  run-smoke-test:
+    name: Runs CLI Smoke Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+      - run: pnpm fetch-rehearsal
+      - run: pnpm test
