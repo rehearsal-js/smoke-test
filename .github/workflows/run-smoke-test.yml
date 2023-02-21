@@ -1,10 +1,10 @@
 name: CLI-Smoke-Test
 
 on:
+  workflow_dispatch:
   push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+    branches:
+      - master
 
 jobs:
   run-smoke-test:
