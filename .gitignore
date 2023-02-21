@@ -107,3 +107,5 @@ rehearsal-cli/
 rehearsal-js-master/
 *.zip
 *.tar.gz
+
+action-test.sh
