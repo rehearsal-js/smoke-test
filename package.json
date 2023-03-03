@@ -10,7 +10,7 @@
   },
   "license": "BSD-2-Clause",
   "scripts": {
-    "fetch-rehearsal": "sh download-rehearsal-cli.sh && node update-resolutions.js && pnpm install",
+    "fetch-rehearsal": "sh download-rehearsal-cli.sh && node update-resolutions.js && pnpm install --no-frozen-lockfile",
     "test": "vitest --run",
     "test:watch": "vitest --coverage --watch"
   },
