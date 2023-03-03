@@ -4,10 +4,7 @@
 PROJECT_ROOT=$(pwd)
 
 # cleanup any existing tgz files
-rm -rf rehearsal-cli-*.tgz
-
-# remove any existing @rehearsal/cli deps
-pnpm remove @rehearsal/cli
+rm -rf rehearsal-*.tgz
 
 # download the zip from latest github master and unzip it
 wget https://github.com/rehearsal-js/rehearsal-js/archive/refs/heads/master.zip && unzip master.zip
@@ -15,29 +12,34 @@ wget https://github.com/rehearsal-js/rehearsal-js/archive/refs/heads/master.zip 
 # remove the zip
 rm -rf master.zip
 
-# go to the unzipped cli folder
-cd rehearsal-js-master/packages/cli
+# go to the unzipped folder
+cd rehearsal-js-master
 
-# install rehearsal-cli dependencies
+# install rehearsal-js dependencies
 pnpm install
 
-# build the cli
+# build the monorepo
 pnpm build
 
-# create the tarball in the root project folder and cd back to the project root
-pnpm pack --pack-destination $PROJECT_ROOT && cd $PROJECT_ROOT
+# cd into the monorepo packages dir
+cd packages
 
-# save the filename from pnpm pack into a sh variable
-REHEARSAL_CLI_TGZ=$(ls rehearsal-cli-*.tgz)
+# loop over the packages and pack them all to the root project folder
+for package in *; do
+  cd $package
+  echo $package
+  pnpm pack --pack-destination $PROJECT_ROOT
+  cd ..
+done
+
+# cd back to the project root
+cd $PROJECT_ROOT
 
 # cleanup the unzipped files
-rm -rf rehearsal-js-master
+rm -rf rehearsal-js-master node_modules && rm pnpm-lock.yaml
 
-# clean up
-rm -rf node_modules && rm pnpm-lock.yaml
-
-# add @rehearsal/cli to package.json from tarball eg. file:rehearsal-cli-0.0.0.tgz
-pnpm add -D file:$REHEARSAL_CLI_TGZ
-
-# install smoke-test depdendencies
-pnpm install
+# add @rehearsal/* to package.json from tarball eg. file:rehearsal-cli-0.0.0.tgz
+# loop over every tgz file and add it to package.json
+for tgz in *.tgz; do
+  pnpm add -D file:$tgz
+done
