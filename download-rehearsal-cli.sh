@@ -16,7 +16,7 @@ rm -rf master.zip
 cd rehearsal-js-master
 
 # install rehearsal-js dependencies
-pnpm install
+pnpm install --no-frozen-lockfile
 
 # build the monorepo
 pnpm build
