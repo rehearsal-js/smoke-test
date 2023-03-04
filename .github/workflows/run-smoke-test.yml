@@ -2,6 +2,11 @@ name: CLI-Smoke-Test
 
 on:
   workflow_dispatch:
+    inputs:
+      branch_name:
+        type: string
+        default: "master"
+        description: The branch we will checkout
     branches:
       - master
   push:
@@ -20,5 +25,6 @@ jobs:
       - uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
-      - run: pnpm fetch-rehearsal
+      - run: sh download-rehearsal-cli.sh ${{ github.event.inputs.branch_name }}
+      - run: pnpm run update-resolutions
       - run: pnpm test
