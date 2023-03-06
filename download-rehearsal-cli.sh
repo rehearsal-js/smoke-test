@@ -3,7 +3,11 @@
 # save the project root path
 PROJECT_ROOT=$(pwd)
 
-BRANCH=$1
+if [ ! $@ ];
+  then BRANCH='master'
+  else BRANCH=$1
+fi
+
 ZIP_NAME=$(echo $BRANCH | sed "s/.*\///")
 UNZIPPED_NAME=$(echo $BRANCH | sed -e 's/\//-/g')
 
