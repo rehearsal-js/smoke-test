@@ -6,10 +6,21 @@ import { commandSync } from 'execa';
 
 const PROJECT_ROOT = new URL('../', import.meta.url);
 
+/**
+ * @param {string} baseDir string path to a directory.
+ * @returns pojo of package.json
+ */
+function readPackageJson(baseDir) {
+  const pathToPackageJson = join(baseDir, './package.json');
+  return JSON.parse(readFileSync(pathToPackageJson, 'utf8'));
+}
+
+function writePackageJson(baseDir, packageJson) {
+  writeFileSync(join(baseDir, 'package.json'), JSON.stringify(packageJson, null, 2));
+}
+
 export function getRehearsalPackagePaths() {
-  // read the package.json devDependencies
-  const ROOT_PACKAGE_JSON = new URL('./package.json', PROJECT_ROOT);
-  const rootPackageJson = JSON.parse(readFileSync(ROOT_PACKAGE_JSON, 'utf8'));
+  const rootPackageJson = readPackageJson(fileURLToPath(PROJECT_ROOT));
 
   // Iterate over devDependencies from the root projet's package.json
   // and filter for @rehearsal/ packages
@@ -59,8 +70,7 @@ export async function setupProject(project) {
 
   await project.write();
 
-  // Read package.json
-  const packageJson = JSON.parse(readFileSync(join(project.baseDir, 'package.json'), 'utf8'));
+  const packageJson = readPackageJson(project.baseDir);
 
   packageJson['packageManager'] = 'pnpm@7.12.1';
   packageJson['resolutions'] = {};
@@ -72,8 +82,7 @@ export async function setupProject(project) {
     packageJson['resolutions'][packageName] = localPath;
   }
 
-  // write the package.json file
-  writeFileSync(join(project.baseDir, 'package.json'), JSON.stringify(packageJson, null, 2));
+  writePackageJson(project.baseDir, packageJson);
 
   // Copy binaries to root of project fixture
   for (const [, , tarballPath] of packagePaths) {
