@@ -17,6 +17,7 @@
   "devDependencies": {
     "execa": "^5.1.1",
     "fixturify-project": "^5.2.0",
+    "json5": "^2.2.3",
     "vite": "^4.1.4",
     "vitest": "^0.28.4"
   },

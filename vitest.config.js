@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     testTimeout: 100_000,
     hookTimeout: 50_000,
-    watchExclude: ['package.json', '**/fixtures/**'],
-    threads: false,
-  },
+    watchExclude: ['package.json', '**/fixtures/**', 'tmp'],
+    threads: false
+  }
 });
