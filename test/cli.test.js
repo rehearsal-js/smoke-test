@@ -41,7 +41,6 @@ describe('smoke-test @rehearsal/cli graph', () => {
   test('graph command --help', () => {
     const results = run(['graph', '--help']);
     expect(results.exitCode).toBe(0);
-    console.log(results.stdout);
     expect(results.stdout).toContain('graph [options] [basePath]');
   });
 });
