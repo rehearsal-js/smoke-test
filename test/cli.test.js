@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /**
  * The purpose of this package is to provide a simple smoke test for @rehearsal/cli commands.
  * It is not intended to be used in production, nor should it be published to npm.
