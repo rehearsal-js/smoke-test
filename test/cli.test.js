@@ -26,7 +26,6 @@ describe("smoke-test @rehearsal/cli", () => {
     expect(results.exitCode).toBe(0);
     expect(results.stdout).toContain("Usage: rehearsal [options] [command]");
     expect(results.stdout).toContain("migrate [options]");
-    expect(results.stdout).toContain("upgrade [options] [basePath]");
   });
 });
 
@@ -35,13 +34,5 @@ describe("smoke-test @rehearsal/cli migrate", () => {
     const results = run(["migrate", "--help"]);
     expect(results.exitCode).toBe(0);
     expect(results.stdout).toContain("migrate [options]");
-  });
-});
-
-describe("smoke-test @rehearsal/cli upgrade", () => {
-  test("upgrade command --help", () => {
-    const results = run(["upgrade", "--help"]);
-    expect(results.exitCode).toBe(0);
-    expect(results.stdout).toContain("upgrade [options] [basePath]");
   });
 });
