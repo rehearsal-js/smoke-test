@@ -1,47 +1,16 @@
-import { readFileSync, writeFileSync } from 'node:fs';
 import Module from 'node:module';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { commandSync } from 'execa';
+import {
+  readPackageJson,
+  writePackageJson,
+  findRehearsalPackages,
+  updatePackageJson
+} from '../utils';
 
-const PROJECT_ROOT = new URL('../', import.meta.url);
-
-/**
- * @param {string} baseDir string path to a directory.
- * @returns pojo of package.json
- */
-function readPackageJson(baseDir) {
-  const pathToPackageJson = join(baseDir, './package.json');
-  return JSON.parse(readFileSync(pathToPackageJson, 'utf8'));
-}
-
-function writePackageJson(baseDir, packageJson) {
-  writeFileSync(join(baseDir, 'package.json'), JSON.stringify(packageJson, null, 2));
-}
-
-export function getRehearsalPackagePaths() {
-  const rootPackageJson = readPackageJson(fileURLToPath(PROJECT_ROOT));
-
-  // Iterate over devDependencies from the root projet's package.json
-  // and filter for @rehearsal/ packages
-  // Creates a array of tuples like:
-  // [@rehearsal/cli, file:rehearsal-cli-2.X.X-beta.tgz, file:///path/to/project/root/rehearsal-cli-2.X.X-beta.tgz]
-
-  const packagePaths = Object.entries(rootPackageJson.devDependencies)
-    .filter(([packageName]) => packageName.startsWith('@rehearsal/'))
-    .map(([packageName, packageResolutionUrl]) => {
-      const pathToPackage = new URL(packageResolutionUrl, PROJECT_ROOT);
-      return [packageName, packageResolutionUrl, pathToPackage];
-    });
-
-  if (packagePaths.length < 1) {
-    throw new Error(
-      'Unable to find rehearsal dependencies in root package.json. Did you run `sh download-rehearsal-cli.sh` ?'
-    );
-  }
-
-  return packagePaths;
-}
+const PROJECT_ROOT_URL = new URL('../', import.meta.url);
+const PROJECT_ROOT_DIR = fileURLToPath(PROJECT_ROOT_URL);
 
 /**
  * Add the necessary devDependencies for a project fixture to run rehearasl.
@@ -62,31 +31,28 @@ export async function setupProject(project) {
   project.addDevDependency('eslint-config-prettier', '8.8.0');
   project.addDevDependency('eslint-plugin-prettier', '4.2.1');
 
-  let packagePaths = getRehearsalPackagePaths();
-
-  if (!project.pkg.devDependencies) {
-    project.pkg.devDependencies = {};
-  }
+  // Get packageJson entries for @rehearsal packages from root package.json
+  // transform paths to be absolute paths to the tarball files.
+  let packagePaths = findRehearsalPackages(readPackageJson(PROJECT_ROOT_DIR)).map(
+    ([packageName, packagePath]) => {
+      const pathToTarball = join(PROJECT_ROOT_DIR, fileURLToPath(packagePath));
+      return [packageName, pathToTarball];
+    }
+  );
 
   await project.write();
 
   const packageJson = readPackageJson(project.baseDir);
 
   packageJson['packageManager'] = 'pnpm@7.12.1';
-  packageJson['resolutions'] = {};
 
-  // Add all the rehearsal dependencies
-  for (const [packageName, localPath] of packagePaths) {
-    // Can't use addDev because that uses NPM and it complains about an invalid dependency
-    packageJson['devDependencies'][packageName] = localPath;
-    packageJson['resolutions'][packageName] = localPath;
-  }
+  updatePackageJson(packageJson, packagePaths);
 
   writePackageJson(project.baseDir, packageJson);
 
   // Copy binaries to root of project fixture
-  for (const [, , tarballPath] of packagePaths) {
-    commandSync(`cp ${fileURLToPath(tarballPath)} ./`, { cwd: project.baseDir });
+  for (const [, pathToTarball] of packagePaths) {
+    commandSync(`cp ${pathToTarball} ./`, { cwd: project.baseDir });
   }
 
   let results;
