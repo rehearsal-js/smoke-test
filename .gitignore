@@ -109,3 +109,5 @@ rehearsal-js-master/
 *.tar.gz
 
 action-test.sh
+
+tmp/
