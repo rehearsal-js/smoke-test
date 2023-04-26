@@ -110,8 +110,6 @@ export function resolveCLIBin(project) {
   // Resolve the rehearsal CLI bin relative the installed instance for project fixture
   const require = Module.createRequire(join(project.baseDir, 'package.json'));
   const bin = require.resolve('@rehearsal/cli/bin/rehearsal.js');
-  console.log('Fixture Root: ', project.baseDir);
-  console.log('Path to CLI in Fixture: ', bin);
   return bin;
 }
 

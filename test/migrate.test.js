@@ -36,7 +36,6 @@ describe('validation-test @rehearsal/cli migrate', () => {
     const results = run(['migrate', '--ci']);
 
     // Dumping the output for debuggability
-    console.log(results.stdout);
     expect(results.stdout).toContain('[STARTED] Convert JS files to TS');
     expect(results.stdout).toContain('[DATA] git mv /lib/sandwich.js to /lib/sandwich.ts');
     expect(results.stdout).toContain('[DATA] git mv /lib/burger.js to /lib/burger.ts');

@@ -38,18 +38,14 @@ describe('validation-test @rehearsal/cli graph', () => {
 
   test('graph --help', () => {
     const results = run(['graph', '--help']);
-    // Dumping the output for debuggability
-    console.log(results.stdout);
     expect(results.exitCode).toBe(0);
     expect(results.stdout).toContain('graph [options] [basePath]');
   });
 
   test('graph', () => {
     const results = run(['graph']);
-    // Dumping the output for debuggability
-    console.log(results.stdout);
-    expect(results.exitCode).toBe(0);
 
+    expect(results.exitCode).toBe(0);
     expect(results.stdout).toContain(`[STARTED] Analyzing project dependency graph`);
 
     const output = results.stdout
