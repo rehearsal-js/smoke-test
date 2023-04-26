@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 
-import { describe, expect, test, beforeEach } from 'vitest';
+import { describe, expect, test, afterEach, beforeEach } from 'vitest';
 import { Project } from 'fixturify-project';
 import { runCommandFactory, setupProject, resolveCLIBin } from './test-helpers';
 
 describe('validation-test @rehearsal/cli migrate', () => {
   let run;
+  let project;
 
   beforeEach(async () => {
-    let project = new Project('simple', '1.0.0', {
+    project = new Project('simple', '1.0.0', {
       files: {
         'index.js': `
           import './lib/hotdog';
@@ -29,6 +30,10 @@ describe('validation-test @rehearsal/cli migrate', () => {
 
     // Set up command for tests
     run = runCommandFactory(bin, { cwd: project.baseDir });
+  });
+
+  afterEach(async () => {
+    project.dispose();
   });
 
   test('migrate --ci', async () => {
