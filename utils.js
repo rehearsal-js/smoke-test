@@ -62,7 +62,6 @@ export function updatePackageJson(packageJson, packagePaths) {
   }
 
   for (const [packageName, packagePath] of packagePaths) {
-    console.log(packageName, packagePath);
     packageJson['devDependencies'][packageName] = packagePath;
     packageJson['resolutions'][packageName] = packagePath;
   }
