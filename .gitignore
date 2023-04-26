@@ -110,4 +110,5 @@ rehearsal-js-master/
 
 action-test.sh
 
+# tmp dir for checked out super-rentals versions.
 tmp/
