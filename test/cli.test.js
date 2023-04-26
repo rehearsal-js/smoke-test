@@ -9,6 +9,7 @@
 import Module from 'node:module';
 import { describe, expect, test } from 'vitest';
 import { commandSync } from 'execa';
+import { runCommandFactory } from './test-helpers';
 // This binary is coming from the "download-rehearsal-cli" script
 // we want to test the CLI binary that is downloaded from the master branch
 // of https://github.com/rehearsal-js/rehearsal-js
@@ -16,9 +17,7 @@ import { commandSync } from 'execa';
 const require = Module.createRequire(import.meta.url);
 const CLI_BIN = require.resolve('@rehearsal/cli/bin/rehearsal.js');
 
-const run = (args, options) => {
-  return commandSync(`node ${CLI_BIN} ${args.join(' ')}`, options);
-};
+const run = runCommandFactory(CLI_BIN);
 
 describe('smoke-test @rehearsal/cli', () => {
   test('without command only --help', () => {
