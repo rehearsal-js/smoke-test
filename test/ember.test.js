@@ -5,7 +5,7 @@ import { join } from 'path';
 import { Project } from 'fixturify-project';
 import { commandSync } from 'execa';
 import { runCommandFactory, setupEmberProject, resolveCLIBin } from './test-helpers';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { afterEach } from 'vitest';
 
@@ -18,6 +18,7 @@ describe('validation-test ember@3.28 LTS', () => {
   let run;
   let pathToSuperRentals;
   let project;
+  let readFile;
 
   beforeAll(() => {
     const tmpDir = new URL('../tmp/', import.meta.url);
@@ -108,6 +109,10 @@ describe('validation-test ember@3.28 LTS', () => {
     const bin = resolveCLIBin(project);
     // Set up command for tests
     run = runCommandFactory(bin, { cwd: project.baseDir });
+
+    readFile = (filePath) => {
+      return readFileSync(join(project.baseDir, filePath), 'utf-8');
+    };
   });
 
   afterEach(() => {
@@ -131,5 +136,9 @@ describe('validation-test ember@3.28 LTS', () => {
     expect(results.exitCode).toBe(0);
     expect(results.stdout).toContain('[STARTED] Convert JS files to TS');
     expect(results.stdout).toContain('[SUCCESS] Migration Complete');
+
+    expect(readFile('app/components/map.ts')).toMatchSnapshot();
+    expect(readFile('app/components/share-button.ts')).toMatchSnapshot();
+    expect(readFile('app/models/rental.ts')).toMatchSnapshot();
   });
 });
