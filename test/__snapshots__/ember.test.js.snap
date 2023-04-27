@@ -28,3 +28,112 @@ exports[`validation-test ember@3.28 LTS > graph 1`] = `
 [DATA] tests/unit/models/rental-test.js
 [SUCCESS] Analyzing project dependency graph"
 `;
+
+exports[`validation-test ember@3.28 LTS > migrate 1`] = `
+"import Component from '@glimmer/component';
+import ENV from 'super-rentals/config/environment';
+
+const MAPBOX_API = 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/static';
+
+// @ts-expect-error @rehearsal TODO TS2314: Generic type 'Component<Args, S>' requires 2 type argument(s).
+export default class MapComponent extends Component {
+  get src() {
+    // @ts-expect-error @rehearsal TODO TS2339: Property 'args' does not exist on type 'MapComponent'.
+    let { lng, lat, width, height, zoom } = this.args;
+
+    let coordinates = \`\${lng},\${lat},\${zoom}\`;
+    let dimensions = \`\${width}x\${height}\`;
+    let accessToken = \`access_token=\${this.token}\`;
+
+    return \`\${MAPBOX_API}/\${coordinates}/\${dimensions}@2x?\${accessToken}\`;
+  }
+
+  get token() {
+    return encodeURIComponent(ENV.MAPBOX_ACCESS_TOKEN);
+  }
+}
+"
+`;
+
+exports[`validation-test ember@3.28 LTS > migrate 2`] = `
+"import { inject as service } from '@ember/service';
+import Component from '@glimmer/component';
+
+const TWEET_INTENT = 'https://twitter.com/intent/tweet';
+
+// @ts-expect-error @rehearsal TODO TS2314: Generic type 'Component<Args, S>' requires 2 type argument(s).
+export default class ShareButtonComponent extends Component {
+  // @ts-expect-error @rehearsal TODO TS2564: Property 'router' has no initializer and is not definitely assigned in the constructor.
+  @service router: { currentURL: string | URL };
+  // @ts-expect-error @rehearsal TODO TS2564: Property 'locale' has no initializer and is not definitely assigned in the constructor.
+  @service locale: { current: () => string };
+
+  get currentURL() {
+    return new URL(this.router.currentURL, window.location.origin);
+  }
+
+  get shareURL() {
+    let url = new URL(TWEET_INTENT);
+
+    // @ts-expect-error @rehearsal TODO TS2345: Argument of type 'URL' is not assignable to parameter of type 'string'. Consider verifying both types, using type assertion: '( this.currentURL as string)', or using type guard: 'if ( this.currentURL instanceof string) { ... }'.
+    url.searchParams.set('url', this.currentURL);
+
+    // @ts-expect-error @rehearsal TODO TS2339: Property 'args' does not exist on type 'ShareButtonComponent'.
+    if (this.args.text) {
+      // @ts-expect-error @rehearsal TODO TS2339: Property 'args' does not exist on type 'ShareButtonComponent'.
+      url.searchParams.set('text', this.args.text);
+    }
+
+    // @ts-expect-error @rehearsal TODO TS2339: Property 'args' does not exist on type 'ShareButtonComponent'.
+    if (this.args.hashtags) {
+      // @ts-expect-error @rehearsal TODO TS2339: Property 'args' does not exist on type 'ShareButtonComponent'.
+      url.searchParams.set('hashtags', this.args.hashtags);
+    }
+
+    // @ts-expect-error @rehearsal TODO TS2339: Property 'args' does not exist on type 'ShareButtonComponent'.
+    if (this.args.via) {
+      // @ts-expect-error @rehearsal TODO TS2339: Property 'args' does not exist on type 'ShareButtonComponent'.
+      url.searchParams.set('via', this.args.via);
+    }
+
+    url.searchParams.set('locale', this.locale.current());
+
+    return url;
+  }
+}
+"
+`;
+
+exports[`validation-test ember@3.28 LTS > migrate 3`] = `
+"import Model, { attr } from '@ember-data/model';
+
+const COMMUNITY_CATEGORIES = ['Condo', 'Townhouse', 'Apartment'];
+
+export default class RentalModel extends Model {
+  // @ts-expect-error @rehearsal TODO TS7008: Member 'title' implicitly has an 'any' type.
+  @attr title;
+  // @ts-expect-error @rehearsal TODO TS7008: Member 'owner' implicitly has an 'any' type.
+  @attr owner;
+  // @ts-expect-error @rehearsal TODO TS7008: Member 'city' implicitly has an 'any' type.
+  @attr city;
+  // @ts-expect-error @rehearsal TODO TS7008: Member 'location' implicitly has an 'any' type.
+  @attr location;
+  // @ts-expect-error @rehearsal TODO TS2564: Property 'category' has no initializer and is not definitely assigned in the constructor.
+  @attr category: string;
+  // @ts-expect-error @rehearsal TODO TS7008: Member 'image' implicitly has an 'any' type.
+  @attr image;
+  // @ts-expect-error @rehearsal TODO TS7008: Member 'bedrooms' implicitly has an 'any' type.
+  @attr bedrooms;
+  // @ts-expect-error @rehearsal TODO TS7008: Member 'description' implicitly has an 'any' type.
+  @attr description;
+
+  get type() {
+    if (COMMUNITY_CATEGORIES.includes(this.category)) {
+      return 'Community';
+    } else {
+      return 'Standalone';
+    }
+  }
+}
+"
+`;
