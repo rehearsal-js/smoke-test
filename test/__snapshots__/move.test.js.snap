@@ -1,0 +1,43 @@
+// Vitest Snapshot v1
+
+exports[`validation-test: rehearsal move > 'simple': move [ '--help' ] 1`] = `
+"Usage: rehearsal move|mv [options]
+
+git mv conversion of JS files -> TS files
+
+Options:
+  -s, --source <path to source file | directory>  the explicit source file OR explicit directory with implicit child directories moved. migration strategy is ignored (default: \\"\\")
+  -p, --childPackage <path to child package>      specify the child-package relative to process.cwd(). migration strategy is leveraged moving all necessary files in the dependency graph for this package (default: \\"\\")
+  -d, --dryRun                                    Do nothing; only show what would happen (default: false)
+  -h, --help                                      display help for command"
+`;
+
+exports[`validation-test: rehearsal move > 'simple': move [ '--source', 'index.js' ] 1`] = `
+"[32minfo[39m:    @rehearsal/move 2.0.0-beta
+[STARTED] Initialize
+[SUCCESS] Initialize
+[STARTED] Executing git mv
+[DATA] git mv failed, using mv
+[DATA] renamed: 
+[DATA] /index.js -> /index.ts
+[DATA] 
+[SUCCESS] Executing git mv"
+`;
+
+exports[`validation-test: rehearsal move > 'workspace': move [ '--childPackage', 'packages/blorp' ] 1`] = `
+"[32minfo[39m:    @rehearsal/move 2.0.0-beta
+[STARTED] Initialize
+[SUCCESS] Initialize
+[STARTED] Analyzing project dependency graph
+[SUCCESS] Analyzing project dependency graph
+[STARTED] Executing git mv
+[DATA] git mv failed, using mv
+[DATA] git mv failed, using mv
+[DATA] git mv failed, using mv
+[DATA] renamed: 
+[DATA] /packages/blorp/build.js -> /packages/blorp/build.ts
+[DATA] /packages/blorp/lib/impl.js -> /packages/blorp/lib/impl.ts
+[DATA] /packages/blorp/index.js -> /packages/blorp/index.ts
+[DATA] 
+[SUCCESS] Executing git mv"
+`;

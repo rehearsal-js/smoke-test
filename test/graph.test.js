@@ -1,40 +1,14 @@
-#!/usr/bin/env node
-
 import { describe, expect, test, afterEach, beforeEach } from 'vitest';
-import { Project } from 'fixturify-project';
-import { runCommandFactory, setupProject, resolveCLIBin } from './test-helpers';
+import { setupProjectRunner } from './test-helpers';
 
-describe('validation-test @rehearsal/cli graph', () => {
+describe('validation-test: rehearsal graph', () => {
   let run;
   let project;
 
   beforeEach(async () => {
-    project = new Project('simple', '1.0.0', {
-      files: {
-        'index.js': `
-          import './lib/hotdog';
-          import './lib/burger';
-        `,
-        lib: {
-          'hotdog.js': `import './sandwich';`,
-          'burger.js': `import './sandwich';`,
-          'sandwich.js': `import 'chalk';`
-        }
-      }
-    });
-    project.pkg.exports = './index.js';
-    project.pkg.volta = {
-      node: '16.19.0'
-    };
-    project.addDependency('chalk', '5.2.0');
-
-    // Setup project with dependencies to use rehearsal e.g. typescript, eslint, prettier
-    await setupProject(project);
-
-    const bin = resolveCLIBin(project);
-
-    // Set up command for tests
-    run = runCommandFactory(bin, { cwd: project.baseDir });
+    let runner = await setupProjectRunner('simple');
+    run = runner.run;
+    project = runner.project;
   });
 
   afterEach(async () => {

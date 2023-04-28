@@ -19,29 +19,35 @@ const CLI_BIN = require.resolve('@rehearsal/cli/bin/rehearsal.js');
 
 const run = runCommandFactory(CLI_BIN);
 
-describe('smoke-test @rehearsal/cli', () => {
+describe('smoke-test @rehearsal/cli no project', () => {
+  // This test suite validates that basic packaging of the CLI doesn't
+  // cause a runtime error.
+
   test('without command only --help', () => {
     const results = run(['--help']);
     expect(results.exitCode).toBe(0);
     expect(results.stdout).toContain('Usage: rehearsal [options] [command]');
     expect(results.stdout).toContain('migrate [options]');
     expect(results.stdout).toContain('graph [options] [basePath]');
+    expect(results.stdout).toContain('move|mv [options]');
+    expect(results.stdout).toContain('help [command]');
   });
-});
 
-describe('smoke-test @rehearsal/cli migrate', () => {
+  test('graph command --help', () => {
+    const results = run(['graph', '--help']);
+    expect(results.exitCode).toBe(0);
+    expect(results.stdout).toContain('graph [options] [basePath]');
+  });
+
+  test('move command --help', () => {
+    const results = run(['move', '--help']);
+    expect(results.exitCode).toBe(0);
+    expect(results.stdout).toContain('move|mv [options]');
+  });
+
   test('migrate command --help', () => {
     const results = run(['migrate', '--help']);
     expect(results.exitCode).toBe(0);
     expect(results.stdout).toContain('migrate [options]');
-  });
-});
-
-describe('smoke-test @rehearsal/cli graph', () => {
-  test('graph command --help', () => {
-    const results = run(['graph', '--help']);
-    expect(results.exitCode).toBe(0);
-    console.log(results.stdout);
-    expect(results.stdout).toContain('graph [options] [basePath]');
   });
 });

@@ -2,6 +2,7 @@ import Module from 'node:module';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { commandSync } from 'execa';
+import { Project } from 'fixturify-project';
 import {
   readPackageJson,
   writePackageJson,
@@ -86,4 +87,130 @@ export function runCommandFactory(rehearsalCLIBin, factoryOptions) {
       ...options
     });
   };
+}
+
+export function getSimpleProjectFixture() {
+  const project = new Project('simple', '1.0.0', {
+    files: {
+      'index.js': `
+          import './lib/hotdog';
+          import './lib/burger';
+        `,
+      lib: {
+        'hotdog.js': `import './sandwich';`,
+        'burger.js': `import './sandwich';`,
+        'sandwich.js': `import 'chalk';`
+      }
+    }
+  });
+  project.pkg.exports = './index.js';
+  project.pkg.volta = {
+    node: '16.19.0'
+  };
+
+  project.addDependency('chalk', '5.2.0');
+
+  return project;
+}
+
+export function getWorkspaceProjectFixture() {
+  const project = new Project('library-with-workspace', '1.0.0');
+
+  project.files = {
+    packages: {
+      foo: {
+        'package.json': `{
+              "name": "@something/foo",
+              "version": "1.0.0",
+              "main": "index.js",
+              "dependencies": {
+                "@something/bar": "*"
+              }
+            }`,
+        'index.js': `
+              import './lib/a';
+            `,
+        lib: {
+          'a.js': `
+              // a.js
+              console.log('foo');
+             `
+        }
+      },
+      bar: {
+        'package.json': `{
+              "name": "@something/bar",
+              "version": "1.0.0",
+              "main": "index.js",
+              "dependencies": {
+                "@something/baz": "*"
+              },
+              "devDependencies": {
+                "@something/blorp": "*"
+              }
+            }`
+      },
+      baz: {
+        'package.json': `{
+              "name": "@something/baz",
+              "version": "1.0.0",
+              "main": "index.js",
+              "dependencies": {
+              }
+            }`
+      },
+      blorp: {
+        'package.json': `{
+              "name": "@something/blorp",
+              "version": "1.0.0",
+              "main": "index.js"
+            }`,
+        'build.js': `import '../../some-shared-util';`,
+        'index.js': `
+              import './lib/impl';
+            `,
+        lib: {
+          'impl.js': `
+                // impl.js
+              `
+        }
+      }
+    },
+    'package.json': `
+          {
+            "name": "library-with-workspace",
+            "version": "1.0.0",
+            "main": "index.js",
+            "license": "MIT",
+            "workspaces": [
+              "packages/*"
+            ]
+          }
+        `,
+    'some-util.js': '// Some useful util file shared across packages.'
+  };
+
+  project.pkg.volta = {
+    node: '16.19.0'
+  };
+
+  return project;
+}
+
+export function getProjectFixture(variant) {
+  if (variant == 'simple') {
+    return getSimpleProjectFixture();
+  }
+  if (variant == 'workspace') {
+    return getWorkspaceProjectFixture();
+  }
+
+  throw new Error(`Invalid project fixture variant: ${variant}`);
+}
+
+export async function setupProjectRunner(variant) {
+  const project = getProjectFixture(variant);
+  await setupProject(project);
+  const run = runCommandFactory(resolveCLIBin(project), { cwd: project.baseDir });
+  return { run, project };
 }
