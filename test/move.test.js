@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { describe, expect, test } from 'vitest';
 import { setupProjectRunner } from './test-helpers';
 
