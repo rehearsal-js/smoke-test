@@ -1,10 +1,11 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, existsSync, writeFileSync } from 'node:fs';
 import Module from 'node:module';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { commandSync } from 'execa';
 import { Project } from 'fixturify-project';
 import JSON5 from 'json5';
+import debug from 'debug';
 
 import {
   readPackageJson,
@@ -13,8 +14,15 @@ import {
   updatePackageJson
 } from '../utils';
 
+const DEBUG_CALLBACK = debug('rehearsal:smoke-test');
+
 const PROJECT_ROOT_URL = new URL('../', import.meta.url);
 const PROJECT_ROOT_DIR = fileURLToPath(PROJECT_ROOT_URL);
+
+const superRentalsHashes = {
+  'ember-source@~4.5': '9c510c46bff431f146bbbd9820a05a8e57c9b2eb',
+  'ember-source@~3.27': 'f1a8cf65bcdd8da7b96bf129a0d618ef94e75601'
+};
 
 function readTSConfig(baseDir) {
   return JSON5.parse(readFileSync(join(baseDir, './tsconfig.json'), 'utf-8'));
@@ -59,19 +67,24 @@ function setupProjectWithRehearsalBinaries(project) {
 export async function setupEmberProject(project) {
   addRehearsalDependencies(project);
   project.addDevDependency('@types/node', '18.15.12');
-  project.addDevDependency('@glint/core', '1.0.0-beta.4');
-  project.addDevDependency('@glint/template', '1.0.0-beta.4');
-  project.addDevDependency('@glint/environment-ember-loose', '1.0.0-beta.4');
-  project.addDevDependency('@glint/environment-ember-template-imports', '1.0.0-beta.4');
+  project.addDevDependency('@glint/core', '^1.0.0');
+  project.addDevDependency('@glint/template', '^1.0.0');
+  project.addDevDependency('@glint/environment-ember-loose', '^1.0.0');
+  project.addDevDependency('@glint/environment-ember-template-imports', '^1.0.0');
   project.addDevDependency('ember-cli-typescript', '5.2.1');
   project.addDevDependency('ember-template-imports', '3.4.2');
 
-  await project.write();
+  // Required from @glint/core>=1.0.0
+  project.addDevDependency('@glimmer/component', '^1.1.2');
+  project.addDevDependency('ember-modifier', '^3.2.7');
+  project.addDevDependency('@types/ember__component', '^4.0.8');
 
+  await project.write();
+  DEBUG_CALLBACK('Project Directory %s', project.baseDir);
   const opts = { cwd: project.baseDir, shell: true };
   // We have to use yarn for this step because ember cli doesn't know about pnpm usage.
   commandSync('yarn install', opts);
-  commandSync('yarn ember generate ember-cli-typescript', opts);
+  commandSync('yarn ember install ember-cli-typescript', opts);
 
   // Append glint configuration entry to tsconfig.json
 
@@ -133,10 +146,16 @@ export function resolveCLIBin(project) {
 
 export function runCommandFactory(rehearsalCLIBin, factoryOptions) {
   return (args, options) => {
-    return commandSync(`node ${rehearsalCLIBin} ${args.join(' ')}`, {
+    const command = `node ${rehearsalCLIBin} ${args.join(' ')}`;
+    const results = commandSync(command, {
       ...factoryOptions,
       ...options
     });
+
+    DEBUG_CALLBACK('Command: %s', command);
+    DEBUG_CALLBACK(results.stdout);
+
+    return results;
   };
 }
 
@@ -248,20 +267,142 @@ export function getWorkspaceProjectFixture() {
   return project;
 }
 
-export function getProjectFixture(variant) {
+function setupSuperRentals(key) {
+  const tmpDir = new URL('../tmp/', import.meta.url);
+
+  if (!existsSync(tmpDir)) {
+    commandSync(`mkdir -p ${fileURLToPath(tmpDir)}`, { shell: true });
+  }
+
+  if (!superRentalsHashes[key]) {
+    throw new Error('Invalid key for super rentals');
+  }
+
+  const hash = superRentalsHashes[key];
+  const pathToSuperRentals = join(fileURLToPath(tmpDir), `super-rentals-${hash}`);
+
+  if (!existsSync(pathToSuperRentals)) {
+    // Download archive
+    const archiveURL = `https://github.com/ember-learn/super-rentals/archive/${hash}.zip`;
+
+    commandSync(`wget ${archiveURL}`, {
+      cwd: tmpDir,
+      shell: true
+    });
+    commandSync(`unzip ${hash}.zip`, { cwd: tmpDir, shell: true });
+    commandSync(`rm ${hash}.zip`, { cwd: tmpDir, shell: true });
+    commandSync('yarn install', { cwd: pathToSuperRentals });
+  }
+
+  return pathToSuperRentals;
+}
+
+function patchEmberAppWithService(project) {
+  // Add service and update a component to use that service.
+  project.mergeFiles({
+    app: {
+      components: {
+        'share-button.js': `import { inject as service } from '@ember/service';
+    import Component from '@glimmer/component';
+
+    const TWEET_INTENT = 'https://twitter.com/intent/tweet';
+
+    export default class ShareButtonComponent extends Component {
+      @service router;
+      @service locale;
+
+      get currentURL() {
+        return new URL(this.router.currentURL, window.location.origin);
+      }
+
+      get shareURL() {
+        let url = new URL(TWEET_INTENT);
+
+        url.searchParams.set('url', this.currentURL);
+
+        if (this.args.text) {
+          url.searchParams.set('text', this.args.text);
+        }
+
+        if (this.args.hashtags) {
+          url.searchParams.set('hashtags', this.args.hashtags);
+        }
+
+        if (this.args.via) {
+          url.searchParams.set('via', this.args.via);
+        }
+
+        url.searchParams.set('locale', this.locale.current());
+
+        return url;
+      }
+    }`
+      },
+      services: {
+        'locale.js': `
+            import Service from '@ember/service';
+
+            export default class LocaleService extends Service {
+                current() {
+                    return 'en-US';
+                }
+            }
+          `
+      }
+    }
+  });
+}
+
+function getEmberApp3_28() {
+  const pathToFixture = setupSuperRentals('ember-source@~3.27');
+  const project = Project.fromDir(pathToFixture, { linkDeps: false, linkDevDeps: false });
+  project.addDevDependency('ember-source', '~3.28.0');
+  project.addDevDependency('ember-cli', '~3.28.0');
+  return project;
+}
+
+function getEmberApp4_4() {
+  const pathToFixture = setupSuperRentals('ember-source@~4.5');
+  const project = Project.fromDir(pathToFixture, { linkDeps: false, linkDevDeps: false });
+  project.addDevDependency('ember-source', '~4.4.0');
+  project.addDevDependency('ember-cli', '~4.4.0');
+  return project;
+}
+
+export async function getProjectFixture(variant) {
   if (variant == 'simple') {
-    return getSimpleProjectFixture();
+    const project = getSimpleProjectFixture();
+    await setupProject(project);
+    return project;
   }
   if (variant == 'workspace') {
-    return getWorkspaceProjectFixture();
+    const project = getWorkspaceProjectFixture();
+    await setupProject(project);
+    return project;
+  }
+  if (variant == 'ember-app-3.28') {
+    const project = getEmberApp3_28();
+    patchEmberAppWithService(project);
+    await setupEmberProject(project);
+    return project;
+  }
+  if (variant == 'ember-app-4.4') {
+    const project = getEmberApp4_4();
+    patchEmberAppWithService(project);
+    await setupEmberProject(project);
+    return project;
   }
 
   throw new Error(`Invalid project fixture variant: ${variant}`);
 }
 
 export async function setupProjectRunner(variant) {
-  const project = getProjectFixture(variant);
-  await setupProject(project);
+  const project = await getProjectFixture(variant);
+
   const run = runCommandFactory(resolveCLIBin(project), { cwd: project.baseDir });
-  return { run, project };
+
+  const readFile = (filePath) => {
+    return readFileSync(join(project.baseDir, filePath), 'utf-8');
+  };
+  return { run, project, readFile };
 }
