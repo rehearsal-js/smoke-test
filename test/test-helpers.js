@@ -353,6 +353,25 @@ function patchEmberAppWithService(project) {
   });
 }
 
+function patchEmberAppWithGjsComponent(project) {
+  project.mergeFiles({
+    app: {
+      components: {
+        'HelloWorld.gjs': `import Component from '@glimmer/component';
+
+export default class Hello extends Component {
+  name = 'world';
+
+  <template>
+    <span>Hello, I am {{this.name}} and I am {{@age}} years old!</span>
+  </template>
+}
+`
+      }
+    }
+  });
+}
+
 function getEmberApp3_28() {
   const pathToFixture = setupSuperRentals('ember-source@~3.27');
   const project = Project.fromDir(pathToFixture, { linkDeps: false, linkDevDeps: false });
@@ -383,12 +402,14 @@ export async function getProjectFixture(variant) {
   if (variant == 'ember-app-3.28') {
     const project = getEmberApp3_28();
     patchEmberAppWithService(project);
+    patchEmberAppWithGjsComponent(project);
     await setupEmberProject(project);
     return project;
   }
   if (variant == 'ember-app-4.4') {
     const project = getEmberApp4_4();
     patchEmberAppWithService(project);
+    patchEmberAppWithGjsComponent(project);
     await setupEmberProject(project);
     return project;
   }

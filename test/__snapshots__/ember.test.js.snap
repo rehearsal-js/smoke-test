@@ -6,6 +6,7 @@ exports[`validation-test ember@3.28 LTS > graph 1`] = `
 [DATA] 
 [DATA] app/adapters/application.js
 [DATA] app/app.js
+[DATA] app/components/HelloWorld.gjs
 [DATA] app/components/map.js
 [DATA] app/components/rental/image.js
 [DATA] app/components/rentals.js
@@ -136,12 +137,27 @@ export default class RentalModel extends Model {
 "
 `;
 
+exports[`validation-test ember@3.28 LTS > migrate 4`] = `
+"import Component from '@glimmer/component';
+
+export default class Hello extends Component {
+  name = 'world';
+
+  <template>
+    {{! @glint-expect-error @rehearsal TODO TS2339: Property 'age' does not exist on type '{}'. }}
+    <span>Hello, I am {{this.name}} and I am {{@age}} years old!</span>
+  </template>
+}
+"
+`;
+
 exports[`validation-test ember@4.4 LTS > graph 1`] = `
 "[STARTED] Analyzing project dependency graph
 [DATA] Graph order for '.':
 [DATA] 
 [DATA] app/adapters/application.js
 [DATA] app/app.js
+[DATA] app/components/HelloWorld.gjs
 [DATA] app/components/map.js
 [DATA] app/components/rental/image.js
 [DATA] app/components/rentals.js
@@ -268,6 +284,20 @@ export default class RentalModel extends Model {
       return 'Standalone';
     }
   }
+}
+"
+`;
+
+exports[`validation-test ember@4.4 LTS > migrate 4`] = `
+"import Component from '@glimmer/component';
+
+export default class Hello extends Component {
+  name = 'world';
+
+  <template>
+    {{! @glint-expect-error @rehearsal TODO TS2339: Property 'age' does not exist on type '{}'. }}
+    <span>Hello, I am {{this.name}} and I am {{@age}} years old!</span>
+  </template>
 }
 "
 `;

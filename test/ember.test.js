@@ -27,6 +27,7 @@ describe('validation-test ember@3.28 LTS', () => {
     expect(readFile('app/components/map.ts')).toMatchSnapshot();
     expect(readFile('app/components/share-button.ts')).toMatchSnapshot();
     expect(readFile('app/models/rental.ts')).toMatchSnapshot();
+    expect(readFile('app/components/HelloWorld.gts')).toMatchSnapshot();
 
     project.dispose();
   });
@@ -58,6 +59,7 @@ describe('validation-test ember@4.4 LTS', () => {
     expect(readFile('app/components/map.ts')).toMatchSnapshot();
     expect(readFile('app/components/share-button.ts')).toMatchSnapshot();
     expect(readFile('app/models/rental.ts')).toMatchSnapshot();
+    expect(readFile('app/components/HelloWorld.gts')).toMatchSnapshot();
 
     project.dispose();
   });
