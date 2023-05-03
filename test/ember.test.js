@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from 'vitest';
+import { describe, expect, test, afterEach, beforeEach } from 'vitest';
 import { getProjectFixture, setupProjectRunner } from './test-helpers';
 
 describe('validation-test ember@3.28 LTS', () => {

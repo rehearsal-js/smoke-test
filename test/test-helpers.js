@@ -144,6 +144,17 @@ export function resolveCLIBin(project) {
   return bin;
 }
 
+// Reference https://ihateregex.io/expr/semver/
+const REGEX_REHEARSAL_PACKAGE_VERSION =
+  /(?!\@rehearsal\/.*)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/;
+
+function replaceVersion(output) {
+  if (output && output.search(REGEX_REHEARSAL_PACKAGE_VERSION) > -1) {
+    output = output.replace(REGEX_REHEARSAL_PACKAGE_VERSION, 'VERSION');
+  }
+  return output;
+}
+
 export function runCommandFactory(rehearsalCLIBin, factoryOptions) {
   return (args, options) => {
     const command = `node ${rehearsalCLIBin} ${args.join(' ')}`;
@@ -154,6 +165,8 @@ export function runCommandFactory(rehearsalCLIBin, factoryOptions) {
 
     DEBUG_CALLBACK('Command: %s', command);
     DEBUG_CALLBACK(results.stdout);
+
+    results.stdout = replaceVersion(results.stdout);
 
     return results;
   };
