@@ -1,9 +1,19 @@
-import { describe, expect, test } from 'vitest';
-import { setupProjectRunner } from './test-helpers';
+import { beforeEach, describe, expect, test } from 'vitest';
+import { getProjectFixture, setupProjectRunner } from './test-helpers';
 
 describe('validation-test ember@3.28 LTS', () => {
-  test('graph', async () => {
-    const { run, project } = await setupProjectRunner('ember-app-3.28');
+  let project;
+
+  beforeEach(async () => {
+    project = await getProjectFixture('ember-app-3.28');
+  });
+
+  afterEach(() => {
+    project.dispose();
+  });
+
+  test('graph', () => {
+    const { run } = setupProjectRunner(project);
     const results = run(['graph']);
 
     expect(results.exitCode).toBe(0);
@@ -16,8 +26,8 @@ describe('validation-test ember@3.28 LTS', () => {
     project.dispose();
   });
 
-  test('migrate', async () => {
-    const { run, project, readFile } = await setupProjectRunner('ember-app-3.28');
+  test('migrate', () => {
+    const { run, readFile } = setupProjectRunner(project);
     const results = run(['migrate', '--ci']);
 
     expect(results.exitCode).toBe(0);
@@ -28,14 +38,22 @@ describe('validation-test ember@3.28 LTS', () => {
     expect(readFile('app/components/share-button.ts')).toMatchSnapshot();
     expect(readFile('app/models/rental.ts')).toMatchSnapshot();
     expect(readFile('app/components/HelloWorld.gts')).toMatchSnapshot();
-
-    project.dispose();
   });
 });
 
 describe('validation-test ember@4.4 LTS', () => {
-  test('graph', async () => {
-    const { run, project } = await setupProjectRunner('ember-app-4.4');
+  let project;
+
+  beforeEach(async () => {
+    project = await getProjectFixture('ember-app-4.4');
+  });
+
+  afterEach(() => {
+    project.dispose();
+  });
+
+  test('graph', () => {
+    const { run } = setupProjectRunner(project);
     const results = run(['graph']);
 
     expect(results.exitCode).toBe(0);
@@ -48,8 +66,8 @@ describe('validation-test ember@4.4 LTS', () => {
     project.dispose();
   });
 
-  test('migrate', async () => {
-    const { run, project, readFile } = await setupProjectRunner('ember-app-4.4');
+  test('migrate', () => {
+    const { run, readFile } = setupProjectRunner(project);
     const results = run(['migrate', '--ci']);
 
     expect(results.exitCode).toBe(0);
@@ -60,7 +78,5 @@ describe('validation-test ember@4.4 LTS', () => {
     expect(readFile('app/components/share-button.ts')).toMatchSnapshot();
     expect(readFile('app/models/rental.ts')).toMatchSnapshot();
     expect(readFile('app/components/HelloWorld.gts')).toMatchSnapshot();
-
-    project.dispose();
   });
 });

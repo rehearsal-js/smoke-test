@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { setupProjectRunner } from './test-helpers';
+import { getProjectFixture, setupProjectRunner } from './test-helpers';
 
 describe('validation-test: rehearsal move', async () => {
   const variants = [
@@ -10,7 +10,8 @@ describe('validation-test: rehearsal move', async () => {
   ];
 
   test.each(variants)('$variant: move $args', async ({ variant, args }) => {
-    const { run, project } = await setupProjectRunner(variant);
+    const project = await getProjectFixture(variant);
+    const { run } = setupProjectRunner(project);
     const results = run(['move', ...args]);
     expect(results.exitCode).toBe(0);
     expect(results.stdout).toMatchSnapshot();

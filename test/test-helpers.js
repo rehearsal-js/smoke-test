@@ -417,13 +417,11 @@ export async function getProjectFixture(variant) {
   throw new Error(`Invalid project fixture variant: ${variant}`);
 }
 
-export async function setupProjectRunner(variant) {
-  const project = await getProjectFixture(variant);
-
+export function setupProjectRunner(project) {
   const run = runCommandFactory(resolveCLIBin(project), { cwd: project.baseDir });
 
   const readFile = (filePath) => {
     return readFileSync(join(project.baseDir, filePath), 'utf-8');
   };
-  return { run, project, readFile };
+  return { run, readFile };
 }
