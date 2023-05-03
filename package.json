@@ -15,6 +15,7 @@
     "test:watch": "vitest --coverage --watch"
   },
   "devDependencies": {
+    "debug": "^4.3.4",
     "execa": "^5.1.1",
     "fixturify-project": "^5.2.0",
     "json5": "^2.2.3",

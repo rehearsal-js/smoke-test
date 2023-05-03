@@ -1,6 +1,9 @@
 lockfileVersion: '6.0'
 
 devDependencies:
+  debug:
+    specifier: ^4.3.4
+    version: 4.3.4
   execa:
     specifier: ^5.1.1
     version: 5.1.1
