@@ -18,7 +18,7 @@ describe('validation-test: rehearsal graph', () => {
   test('graph --help', () => {
     const results = run(['graph', '--help']);
     expect(results.exitCode).toBe(0);
-    expect(results.stdout).toContain('graph [options] [basePath]');
+    expect(results.stdout).toContain('graph [options] [srcDir]');
   });
 
   test('graph', () => {

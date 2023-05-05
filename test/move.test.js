@@ -5,8 +5,8 @@ describe('validation-test: rehearsal move', async () => {
   const variants = [
     { variant: 'simple', args: ['--help'] },
     //   { variant: 'simple', args: [] },
-    { variant: 'simple', args: ['--source', 'index.js'] },
-    { variant: 'workspace', args: ['--childPackage', 'packages/blorp'] }
+    { variant: 'simple', args: ['index.js'] },
+    { variant: 'workspace', args: ['packages/blorp', '--graph', '--deps', '--devDeps'] }
   ];
 
   test.each(variants)('$variant: move $args', async ({ variant, args }) => {

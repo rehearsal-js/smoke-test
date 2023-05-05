@@ -28,7 +28,7 @@ describe('smoke-test @rehearsal/cli no project', () => {
     expect(results.exitCode).toBe(0);
     expect(results.stdout).toContain('Usage: rehearsal [options] [command]');
     expect(results.stdout).toContain('migrate [options]');
-    expect(results.stdout).toContain('graph [options] [basePath]');
+    expect(results.stdout).toContain('graph [options] [srcDir]');
     expect(results.stdout).toContain('move|mv [options]');
     expect(results.stdout).toContain('help [command]');
   });
@@ -36,7 +36,7 @@ describe('smoke-test @rehearsal/cli no project', () => {
   test('graph command --help', () => {
     const results = run(['graph', '--help']);
     expect(results.exitCode).toBe(0);
-    expect(results.stdout).toContain('graph [options] [basePath]');
+    expect(results.stdout).toContain('graph [options] [srcDir]');
   });
 
   test('move command --help', () => {
