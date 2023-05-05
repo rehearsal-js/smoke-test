@@ -1,14 +1,14 @@
 import { describe, expect, test, afterEach, beforeEach } from 'vitest';
-import { setupProjectRunner } from './test-helpers';
+import { getProjectFixture, setupProjectRunner } from './test-helpers';
 
 describe('validation-test: rehearsal graph', () => {
   let run;
   let project;
 
   beforeEach(async () => {
-    let runner = await setupProjectRunner('simple');
+    project = await getProjectFixture('simple');
+    let runner = setupProjectRunner(project);
     run = runner.run;
-    project = runner.project;
   });
 
   afterEach(async () => {

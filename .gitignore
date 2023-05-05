@@ -109,3 +109,6 @@ rehearsal-js-master/
 *.tar.gz
 
 action-test.sh
+
+# tmp dir for checked out super-rentals versions.
+tmp/
